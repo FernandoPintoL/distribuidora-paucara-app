@@ -30,6 +30,11 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Configurar la API key de Google Maps desde local.properties
+        val properties = gradleLocalProperties(rootDir)
+        val mapsApiKey = properties.getProperty("MAPS_API_KEY") ?: System.getenv("MAPS_API_KEY") ?: ""
+        resValue("string", "MAPS_API_KEY", mapsApiKey)
     }
 
     buildTypes {
