@@ -41,6 +41,12 @@ class PaginatedData<T> {
     required this.total,
   });
 
+  // Getter para calcular si hay más páginas
+  bool get hasMorePages => currentPage * perPage < total;
+
+  // Getter para obtener el número total de páginas
+  int get totalPages => (total / perPage).ceil();
+
   factory PaginatedData.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromJson,

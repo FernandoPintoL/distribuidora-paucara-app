@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/providers.dart';
 import '../../models/models.dart';
+import '../carrito/carrito_screen.dart';
 
 class ProductListScreen extends StatefulWidget {
   const ProductListScreen({super.key});
@@ -39,6 +40,52 @@ class _ProductListScreenState extends State<ProductListScreen> {
       appBar: AppBar(
         title: const Text('Productos'),
         actions: [
+          // Badge de carrito
+          Consumer<CarritoProvider>(
+            builder: (context, carritoProvider, _) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CarritoScreen(),
+                        ),
+                      );
+                    },
+                    tooltip: 'Ver carrito',
+                  ),
+                  if (carritoProvider.cantidadProductos > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          '${carritoProvider.cantidadProductos}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
               if (authProvider.canCreateProducts) {
@@ -231,56 +278,140 @@ class ProductListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: ListTile(
-        leading: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.blue.shade100,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(Icons.inventory, color: Colors.blue),
-        ),
-        title: Text(
-          product.nombre,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Código: ${product.codigo}'),
-            if (product.descripcion != null)
-              Text(
-                product.descripcion!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              // Imagen del producto
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.inventory, color: Colors.blue, size: 32),
               ),
-            if (product.precioVenta != null)
-              Text(
-                'Precio: Bs. ${product.precioVenta!.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.w500,
+              const SizedBox(width: 12),
+
+              // Información del producto
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.nombre,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Código: ${product.codigo}',
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    ),
+                    if (product.precioVenta != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Bs ${product.precioVenta!.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-          ],
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: product.activo ? Colors.green.shade100 : Colors.red.shade100,
-            borderRadius: BorderRadius.circular(12),
+
+              // Botón agregar al carrito (solo si el producto está activo)
+              if (product.activo && product.precioVenta != null)
+                Consumer<CarritoProvider>(
+                  builder: (context, carritoProvider, _) {
+                    final yaEnCarrito = carritoProvider.tieneProducto(product.id);
+
+                    if (yaEnCarrito) {
+                      // Si ya está en el carrito, mostrar cantidad
+                      final cantidad = carritoProvider.getCantidadProducto(product.id);
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.green.shade300),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.shopping_cart, size: 16, color: Colors.green.shade700),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${cantidad.toInt()}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    // Si no está en el carrito, mostrar botón agregar
+                    return IconButton(
+                      onPressed: () => _agregarAlCarrito(context, product),
+                      icon: Icon(
+                        Icons.add_shopping_cart,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      tooltip: 'Agregar al carrito',
+                    );
+                  },
+                )
+              else if (!product.activo)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Inactivo',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+            ],
           ),
-          child: Text(
-            product.activo ? 'Activo' : 'Inactivo',
-            style: TextStyle(
-              color: product.activo ? Colors.green : Colors.red,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
         ),
-        onTap: onTap,
+      ),
+    );
+  }
+
+  void _agregarAlCarrito(BuildContext context, Product product) {
+    final carritoProvider = context.read<CarritoProvider>();
+    carritoProvider.agregarProducto(product);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${product.nombre} agregado al carrito'),
+        duration: const Duration(seconds: 2),
+        action: SnackBarAction(
+          label: 'Ver Carrito',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CarritoScreen()),
+            );
+          },
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'models/models.dart';
 import 'providers/providers.dart';
 import 'screens/screens.dart';
 
@@ -15,6 +16,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => ClientProvider()),
+        ChangeNotifierProvider(create: (_) => CarritoProvider()),
+        ChangeNotifierProvider(create: (_) => PedidoProvider()),
+        ChangeNotifierProvider(create: (_) => TrackingProvider()),
       ],
       child: const MyApp(),
     ),
@@ -55,6 +59,93 @@ class MyApp extends StatelessWidget {
       ),
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
+        '/products': (context) => const ProductListScreen(),
+        '/clients': (context) => const ClientListScreen(),
+        '/carrito': (context) => const CarritoScreen(),
+        '/direccion-entrega-seleccion': (context) => const DireccionEntregaSeleccionScreen(),
+        '/mis-pedidos': (context) => const PedidosHistorialScreen(),
+      },
+      onGenerateRoute: (settings) {
+        // Handle routes with arguments
+        switch (settings.name) {
+          case '/fecha-hora-entrega':
+            final direccion = settings.arguments as ClientAddress?;
+            if (direccion == null) {
+              return MaterialPageRoute(
+                builder: (context) => const Scaffold(
+                  body: Center(child: Text('Error: Dirección no encontrada')),
+                ),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (context) => FechaHoraEntregaScreen(direccion: direccion),
+            );
+
+          case '/resumen-pedido':
+            final args = settings.arguments as Map<String, dynamic>?;
+            if (args == null) {
+              return MaterialPageRoute(
+                builder: (context) => const Scaffold(
+                  body: Center(child: Text('Error: Parámetros no encontrados')),
+                ),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (context) => ResumenPedidoScreen(
+                direccion: args['direccion'] as ClientAddress,
+                fechaProgramada: args['fechaProgramada'] as DateTime?,
+                horaInicio: args['horaInicio'] as TimeOfDay?,
+                horaFin: args['horaFin'] as TimeOfDay?,
+                observaciones: args['observaciones'] as String?,
+              ),
+            );
+
+          case '/pedido-creado':
+            final pedido = settings.arguments as Pedido?;
+            if (pedido == null) {
+              return MaterialPageRoute(
+                builder: (context) => const Scaffold(
+                  body: Center(child: Text('Error: Pedido no encontrado')),
+                ),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (context) => PedidoCreadoScreen(pedido: pedido),
+            );
+
+          case '/pedido-detalle':
+            final pedidoId = settings.arguments as int?;
+            if (pedidoId == null) {
+              return MaterialPageRoute(
+                builder: (context) => const Scaffold(
+                  body: Center(child: Text('Error: ID de pedido no encontrado')),
+                ),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (context) => PedidoDetalleScreen(pedidoId: pedidoId),
+            );
+
+          case '/pedido-tracking':
+            final pedido = settings.arguments as Pedido?;
+            if (pedido == null) {
+              return MaterialPageRoute(
+                builder: (context) => const Scaffold(
+                  body: Center(child: Text('Error: Pedido no encontrado')),
+                ),
+              );
+            }
+            return MaterialPageRoute(
+              builder: (context) => PedidoTrackingScreen(pedido: pedido),
+            );
+
+          default:
+            return null;
+        }
+      },
     );
   }
 }

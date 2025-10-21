@@ -5,6 +5,7 @@ import '../services/services.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  final WebSocketService _wsService = WebSocketService();
 
   User? _user;
   bool _isLoading = false;
@@ -35,6 +36,10 @@ class AuthProvider with ChangeNotifier {
         debugPrint('✅ User assigned in login: $_user');
         debugPrint('isLoggedIn: $isLoggedIn');
         _errorMessage = null;
+
+        // Conectar al WebSocket después de login exitoso
+        _connectWebSocket(response.data!.token);
+
         // Retrasar notifyListeners hasta después del build
         WidgetsBinding.instance.addPostFrameCallback((_) {
           notifyListeners();
@@ -92,6 +97,10 @@ class AuthProvider with ChangeNotifier {
       if (response.success && response.data != null) {
         _user = response.data!.user;
         _errorMessage = null;
+
+        // Conectar al WebSocket después de registro exitoso
+        _connectWebSocket(response.data!.token);
+
         // Retrasar notifyListeners hasta después del build
         WidgetsBinding.instance.addPostFrameCallback((_) {
           notifyListeners();
@@ -143,6 +152,13 @@ class AuthProvider with ChangeNotifier {
       if (response.success && response.data != null) {
         _user = response.data;
         _errorMessage = null;
+
+        // Conectar al WebSocket si el usuario se cargó exitosamente
+        final token = await _authService.getToken();
+        if (token != null) {
+          _connectWebSocket(token);
+        }
+
         // Retrasar notifyListeners hasta después del build
         WidgetsBinding.instance.addPostFrameCallback((_) {
           notifyListeners();
@@ -203,6 +219,9 @@ class AuthProvider with ChangeNotifier {
     });
 
     try {
+      // Desconectar del WebSocket antes de hacer logout
+      _wsService.disconnect();
+
       await _authService.logout();
     } catch (e) {
       // Even if logout fails, we clear local data
@@ -222,6 +241,26 @@ class AuthProvider with ChangeNotifier {
     // Retrasar notifyListeners hasta después del build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
+    });
+  }
+
+  /// Conectar al WebSocket después de autenticación exitosa
+  void _connectWebSocket(String token) {
+    if (_user == null) {
+      debugPrint('⚠️ No se puede conectar al WebSocket sin usuario');
+      return;
+    }
+
+    // Conectar en segundo plano, no bloquear la UI
+    _wsService.connect(
+      token: token,
+      userId: _user!.id,
+      userType: 'cliente', // o determinar según el rol del usuario
+    ).then((_) {
+      debugPrint('✅ WebSocket conectado para usuario ${_user!.name}');
+    }).catchError((error) {
+      debugPrint('❌ Error conectando WebSocket: $error');
+      // No fallar el login si el WebSocket no se conecta
     });
   }
 

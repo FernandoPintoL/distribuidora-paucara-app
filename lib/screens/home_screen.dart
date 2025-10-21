@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 import '../providers/providers.dart';
+import '../services/services.dart';
+import '../config/websocket_config.dart';
 import 'products/product_list_screen.dart';
 import 'clients/client_list_screen.dart';
+import 'pedidos/pedidos_historial_screen.dart';
+import 'carrito/carrito_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,10 +23,227 @@ class _HomeScreenState extends State<HomeScreen> {
   late List<BottomNavigationBarItem> _navItems;
   late List<Map<String, dynamic>> _drawerItems;
 
+  final _wsService = WebSocketService();
+  late StreamSubscription _proformaSubscription;
+  late StreamSubscription _stockSubscription;
+  late StreamSubscription _connectionSubscription;
+
+  bool _isConnected = false;
+
   @override
   void initState() {
     super.initState();
     // _buildNavigationItems will be called in didChangeDependencies
+    _setupWebSocketListeners();
+    _isConnected = _wsService.isConnected;
+  }
+
+  void _setupWebSocketListeners() {
+    // Escuchar estado de conexión
+    _connectionSubscription = _wsService.connectionStream.listen((connected) {
+      if (mounted) {
+        setState(() => _isConnected = connected);
+
+        if (connected) {
+          _showNotification('Conectado', 'Conexión establecida', Colors.green);
+        } else {
+          _showNotification('Desconectado', 'Sin conexión al servidor', Colors.red);
+        }
+      }
+    });
+
+    // Escuchar eventos de proformas
+    _proformaSubscription = _wsService.proformaStream.listen((event) {
+      if (!mounted) return;
+
+      final type = event['type'];
+      final data = event['data'];
+
+      switch (type) {
+        case 'created':
+          _handleProformaCreated(data);
+          break;
+        case 'approved':
+          _handleProformaApproved(data);
+          break;
+        case 'rejected':
+          _handleProformaRejected(data);
+          break;
+        case 'converted':
+          _handleProformaConverted(data);
+          break;
+      }
+    });
+
+    // Escuchar eventos de stock
+    _stockSubscription = _wsService.stockStream.listen((event) {
+      if (!mounted) return;
+
+      final type = event['type'];
+      final data = event['data'];
+
+      switch (type) {
+        case 'expiring':
+          _handleStockExpiring(data);
+          break;
+        case 'updated':
+          _handleStockUpdated(data);
+          break;
+      }
+    });
+
+    // También puedes usar callbacks específicos
+    _wsService.on(WebSocketConfig.eventPaymentConfirmed, (data) {
+      if (mounted) {
+        _handlePaymentConfirmed(data);
+      }
+    });
+  }
+
+  void _handleProformaCreated(Map<String, dynamic> data) {
+    _showNotification(
+      'Pedido Creado',
+      'Tu pedido ${data['numero']} ha sido recibido',
+      Colors.blue,
+    );
+  }
+
+  void _handleProformaApproved(Map<String, dynamic> data) {
+    _showNotification(
+      'Pedido Aprobado',
+      data['message'] ?? 'Tu pedido ha sido aprobado',
+      Colors.green,
+    );
+
+    // Opcional: Navegar a detalles del pedido
+    // Navigator.pushNamed(context, '/pedido-detalle', arguments: data['proforma_id']);
+  }
+
+  void _handleProformaRejected(Map<String, dynamic> data) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pedido Rechazado'),
+        content: Text(data['reason'] ?? 'Tu pedido ha sido rechazado'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Entendido'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Navegar a crear nuevo pedido
+              Navigator.pushNamed(context, '/carrito');
+            },
+            child: const Text('Ver Carrito'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleProformaConverted(Map<String, dynamic> data) {
+    _showNotification(
+      'Pedido Procesado',
+      'Tu pedido se ha convertido en venta ${data['venta_numero']}',
+      Colors.orange,
+    );
+  }
+
+  void _handleStockExpiring(Map<String, dynamic> data) {
+    final minutes = data['minutes_remaining'];
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber, color: Colors.orange),
+            const SizedBox(width: 8),
+            const Text('Reserva por Vencer'),
+          ],
+        ),
+        content: Text(
+          'Tu reserva de stock expira en $minutes minutos. '
+          '¿Deseas completar el pedido ahora?'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Más Tarde'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(
+                context,
+                '/pedido-detalle',
+                arguments: data['proforma_id'],
+              );
+            },
+            child: const Text('Ver Pedido'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleStockUpdated(Map<String, dynamic> data) {
+    // Actualizar UI de catálogo si estás en esa pantalla
+    debugPrint('Stock actualizado: ${data['nombre']} - ${data['stock_nuevo']} unidades');
+
+    // Opcional: Mostrar notificación sutil
+    // _showNotification('Stock Actualizado', '${data['nombre']}', Colors.blue);
+  }
+
+  void _handlePaymentConfirmed(Map<String, dynamic> data) {
+    _showNotification(
+      'Pago Confirmado',
+      'Pago de \$${data['monto']} confirmado',
+      Colors.green,
+    );
+  }
+
+  void _showNotification(String title, String message, Color color) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 4),
+            Text(message),
+          ],
+        ),
+        backgroundColor: color,
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: 'Ver',
+          textColor: Colors.white,
+          onPressed: () {
+            // Navegar a pantalla relevante
+            Navigator.pushNamed(context, '/mis-pedidos');
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _proformaSubscription.cancel();
+    _stockSubscription.cancel();
+    _connectionSubscription.cancel();
+    _wsService.off(WebSocketConfig.eventPaymentConfirmed);
+    super.dispose();
   }
 
   @override
@@ -119,6 +341,14 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('Distribuidora Paucara'),
         actions: [
+          // Indicador de conexión WebSocket
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Icon(
+              _isConnected ? Icons.wifi : Icons.wifi_off,
+              color: _isConnected ? Colors.green : Colors.red,
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () => _showLogoutDialog(context),
@@ -163,13 +393,41 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Cerrar Sesión'),
+              leading: const Icon(Icons.shopping_cart),
+              title: const Text('Mi Carrito'),
+              trailing: Consumer<CarritoProvider>(
+                builder: (context, carritoProvider, _) {
+                  if (carritoProvider.cantidadItems == 0) {
+                    return const SizedBox.shrink();
+                  }
+                  return CircleAvatar(
+                    radius: 12,
+                    backgroundColor: Colors.red,
+                    child: Text(
+                      '${carritoProvider.cantidadItems}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                },
+              ),
               onTap: () {
                 Navigator.pop(context);
-                _showLogoutDialog(context);
+                Navigator.pushNamed(context, '/carrito');
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.receipt_long),
+              title: const Text('Mis Pedidos'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/mis-pedidos');
+              },
+            ),
+            const Divider(),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Cerrar Sesión'),
@@ -260,19 +518,21 @@ class DashboardScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: _buildSummaryCard(
-                  title: 'Ventas Hoy',
-                  value: 'Bs. 2,450',
-                  icon: Icons.attach_money,
+                  title: 'Mi Carrito',
+                  value: context.watch<CarritoProvider>().cantidadItems.toString(),
+                  icon: Icons.shopping_cart,
                   color: Colors.orange,
+                  onTap: () => Navigator.pushNamed(context, '/carrito'),
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _buildSummaryCard(
-                  title: 'Pedidos',
-                  value: '12',
-                  icon: Icons.shopping_cart,
+                  title: 'Mis Pedidos',
+                  value: '0',
+                  icon: Icons.receipt_long,
                   color: Colors.purple,
+                  onTap: () => Navigator.pushNamed(context, '/mis-pedidos'),
                 ),
               ),
             ],
@@ -341,32 +601,41 @@ class DashboardScreen extends StatelessWidget {
     required String value,
     required IconData icon,
     required Color color,
+    VoidCallback? onTap,
   }) {
+    final cardContent = Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Icon(icon, size: 32, color: color),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+
     return Card(
       elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Icon(icon, size: 32, color: color),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
+      child: onTap != null
+          ? InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(12),
+              child: cardContent,
+            )
+          : cardContent,
     );
   }
 
