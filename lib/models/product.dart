@@ -37,7 +37,8 @@ class Product {
     return Product(
       id: json['id'],
       nombre: json['nombre'],
-      codigo: json['codigo'],
+      // Backend sends 'sku', not 'codigo'
+      codigo: json['sku'] ?? json['codigo'] ?? '',
       descripcion: json['descripcion'],
       categoria: json['categoria'] != null
           ? Category.fromJson(json['categoria'])
@@ -46,9 +47,12 @@ class Product {
       proveedor: json['proveedor'] != null
           ? Supplier.fromJson(json['proveedor'])
           : null,
-      unidadMedida: json['unidad_medida'] != null
-          ? UnitMeasure.fromJson(json['unidad_medida'])
-          : null,
+      // Backend sends 'unidad', not 'unidad_medida'
+      unidadMedida: json['unidad'] != null
+          ? UnitMeasure.fromJson(json['unidad'])
+          : (json['unidad_medida'] != null
+              ? UnitMeasure.fromJson(json['unidad_medida'])
+              : null),
       activo: json['activo'] ?? true,
       precioCompra: json['precio_compra']?.toDouble(),
       precioVenta: json['precio_venta']?.toDouble(),

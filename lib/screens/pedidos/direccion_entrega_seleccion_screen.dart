@@ -15,6 +15,8 @@ class _DireccionEntregaSeleccionScreenState
     extends State<DireccionEntregaSeleccionScreen> {
   ClientAddress? _direccionSeleccionada;
   bool _isLoading = true;
+  Client? _cliente;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -26,13 +28,21 @@ class _DireccionEntregaSeleccionScreenState
     final authProvider = context.read<AuthProvider>();
     final clientProvider = context.read<ClientProvider>();
 
-    if (authProvider.user?.cliente?.id != null) {
-      await clientProvider.loadClient(authProvider.user!.cliente!.id);
-    }
+    if (authProvider.user?.id != null) {
+      // Obtener el cliente asociado al usuario
+      final cliente = await clientProvider.getClient(authProvider.user!.id);
 
-    setState(() {
-      _isLoading = false;
-    });
+      setState(() {
+        _cliente = cliente;
+        _errorMessage = clientProvider.errorMessage;
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _errorMessage = 'No se pudo identificar al usuario';
+        _isLoading = false;
+      });
+    }
   }
 
   void _continuarAlSiguientePaso() {
@@ -63,17 +73,14 @@ class _DireccionEntregaSeleccionScreenState
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Consumer<ClientProvider>(
-              builder: (context, clientProvider, _) {
-                final cliente = clientProvider.currentClient;
-
-                if (cliente == null) {
-                  return const Center(
-                    child: Text('No se pudo cargar la información del cliente'),
-                  );
-                }
-
-                final direcciones = cliente.addresses ?? [];
+          : _cliente == null
+              ? Center(
+                  child: Text(_errorMessage ?? 'No se pudo cargar la información del cliente'),
+                )
+              : Builder(
+                  builder: (context) {
+                    final cliente = _cliente!;
+                    final direcciones = cliente.direcciones ?? [];
 
                 if (direcciones.isEmpty) {
                   return Center(
@@ -217,10 +224,10 @@ class _DireccionEntregaSeleccionScreenState
                                             ],
                                           ),
 
-                                          if (direccion.zona != null) ...[
+                                          if (direccion.ciudad != null) ...[
                                             const SizedBox(height: 4),
                                             Text(
-                                              'Zona: ${direccion.zona}',
+                                              'Ciudad: ${direccion.ciudad}',
                                               style: const TextStyle(
                                                 color: Colors.grey,
                                                 fontSize: 14,
@@ -228,10 +235,10 @@ class _DireccionEntregaSeleccionScreenState
                                             ),
                                           ],
 
-                                          if (direccion.localidad?.nombre != null) ...[
+                                          if (direccion.departamento != null) ...[
                                             const SizedBox(height: 2),
                                             Text(
-                                              direccion.localidad!.nombre,
+                                              direccion.departamento!,
                                               style: const TextStyle(
                                                 color: Colors.grey,
                                                 fontSize: 14,
@@ -239,8 +246,8 @@ class _DireccionEntregaSeleccionScreenState
                                             ),
                                           ],
 
-                                          if (direccion.referencia != null &&
-                                              direccion.referencia!.isNotEmpty) ...[
+                                          if (direccion.observaciones != null &&
+                                              direccion.observaciones!.isNotEmpty) ...[
                                             const SizedBox(height: 8),
                                             Container(
                                               padding: const EdgeInsets.symmetric(
@@ -252,7 +259,7 @@ class _DireccionEntregaSeleccionScreenState
                                                 borderRadius: BorderRadius.circular(4),
                                               ),
                                               child: Text(
-                                                'Ref: ${direccion.referencia}',
+                                                'Obs: ${direccion.observaciones}',
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   color: Colors.blue.shade900,

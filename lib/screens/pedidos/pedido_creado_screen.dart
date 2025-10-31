@@ -4,10 +4,7 @@ import '../../models/models.dart';
 class PedidoCreadoScreen extends StatelessWidget {
   final Pedido pedido;
 
-  const PedidoCreadoScreen({
-    Key? key,
-    required this.pedido,
-  }) : super(key: key);
+  const PedidoCreadoScreen({super.key, required this.pedido});
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +35,7 @@ class PedidoCreadoScreen extends StatelessWidget {
               // Título
               const Text(
                 'Proforma Creada',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
 
@@ -50,10 +44,7 @@ class PedidoCreadoScreen extends StatelessWidget {
               // Mensaje
               Text(
                 'Tu pedido ha sido registrado exitosamente',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                 textAlign: TextAlign.center,
               ),
 
@@ -75,10 +66,7 @@ class PedidoCreadoScreen extends StatelessWidget {
                         children: [
                           const Text(
                             'Número de Proforma',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                           Text(
                             pedido.numero,
@@ -98,10 +86,7 @@ class PedidoCreadoScreen extends StatelessWidget {
                         children: [
                           const Text(
                             'Estado',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 14,
-                            ),
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(

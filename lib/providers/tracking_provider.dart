@@ -5,6 +5,8 @@ import '../services/services.dart';
 
 class TrackingProvider with ChangeNotifier {
   final TrackingService _trackingService = TrackingService();
+  final WebSocketService _webSocketService = WebSocketService();
+  StreamSubscription? _ubicacionSubscription;
 
   // Estado
   UbicacionTracking? _ubicacionActual;
@@ -30,7 +32,7 @@ class TrackingProvider with ChangeNotifier {
 
   /// Suscribirse al tracking de una entrega
   ///
-  /// Inicia el polling automático cada 30 segundos
+  /// Combina polling (fallback) con WebSocket (tiempo real)
   Future<void> suscribirseATracking(int entregaId) async {
     debugPrint('📍 Suscribiéndose al tracking de entrega: $entregaId');
 
@@ -42,7 +44,10 @@ class TrackingProvider with ChangeNotifier {
     // Cargar datos iniciales
     await _cargarTrackingCompleto(entregaId);
 
-    // Iniciar polling
+    // Escuchar eventos WebSocket de ubicación en tiempo real
+    _iniciarEscuchaWebSocket();
+
+    // Iniciar polling como fallback (en caso de que WebSocket falle)
     _iniciarPolling(entregaId);
   }
 
@@ -51,6 +56,7 @@ class TrackingProvider with ChangeNotifier {
     debugPrint('📍 Desuscribiéndose del tracking');
 
     detenerPolling();
+    _detenerEscuchaWebSocket();
     _entregaIdActual = null;
     _ubicacionActual = null;
     _historialUbicaciones = [];
@@ -58,6 +64,66 @@ class TrackingProvider with ChangeNotifier {
     _errorMessage = null;
 
     notifyListeners();
+  }
+
+  /// Iniciar escucha de eventos WebSocket de ubicación
+  void _iniciarEscuchaWebSocket() {
+    debugPrint('🔌 TrackingProvider: Iniciando escucha WebSocket');
+
+    // Escuchar eventos de ubicación en tiempo real
+    _ubicacionSubscription = _webSocketService.ubicacionStream.listen((event) {
+      final data = event['data'] as Map<String, dynamic>;
+
+      debugPrint('📍 TrackingProvider: Ubicación actualizada vía WebSocket');
+
+      // Actualizar ubicación actual
+      if (data['coordenadas'] != null) {
+        final coords = data['coordenadas'] as Map<String, dynamic>;
+        final nuevaUbicacion = UbicacionTracking(
+          id: data['envio_id'] as int? ?? 0,
+          entregaId: data['envio_id'] as int? ?? _entregaIdActual ?? 0,
+          latitud: (coords['lat'] as num).toDouble(),
+          longitud: (coords['lng'] as num).toDouble(),
+          timestamp: DateTime.parse(data['timestamp'] as String),
+          velocidad: (data['velocidad_kmh'] as num?)?.toDouble(),
+          evento: 'en_ruta',
+        );
+
+        // Solo actualizar si cambió
+        if (_ubicacionActual == null ||
+            _ubicacionActual!.timestamp != nuevaUbicacion.timestamp) {
+          _ubicacionActual = nuevaUbicacion;
+
+          // Agregar al historial
+          if (!_historialUbicaciones.any((u) => u.id == nuevaUbicacion.id)) {
+            _historialUbicaciones.insert(0, nuevaUbicacion);
+          }
+
+          debugPrint('🔄 Ubicación actualizada vía WebSocket: ${nuevaUbicacion.latitud}, ${nuevaUbicacion.longitud}');
+
+          // Actualizar distancia estimada si viene en el evento
+          if (data['eta_minutos'] != null && data['distancia_km'] != null) {
+            final distanciaKm = (data['distancia_km'] as num).toDouble();
+            final etaMinutos = data['eta_minutos'] as int;
+
+            _distanciaEstimada = DistanciaEstimada(
+              distanciaMetros: distanciaKm * 1000,
+              tiempoEstimadoMinutos: etaMinutos,
+              distanciaFormateada: '${distanciaKm.toStringAsFixed(1)} km',
+              tiempoFormateado: '$etaMinutos min',
+            );
+          }
+
+          notifyListeners();
+        }
+      }
+    });
+  }
+
+  /// Detener escucha de eventos WebSocket
+  void _detenerEscuchaWebSocket() {
+    debugPrint('🔌 TrackingProvider: Deteniendo escucha WebSocket');
+    _ubicacionSubscription?.cancel();
   }
 
   /// Cargar tracking completo (historial + ubicación actual)
@@ -89,7 +155,7 @@ class TrackingProvider with ChangeNotifier {
         _errorMessage = null;
         debugPrint('✅ Tracking cargado: ${_historialUbicaciones.length} ubicaciones');
       } else {
-        _errorMessage = response.message ?? 'Error al cargar tracking';
+        _errorMessage = response.message;
         debugPrint('❌ Error cargando tracking: $_errorMessage');
       }
     } catch (e) {
@@ -208,6 +274,7 @@ class TrackingProvider with ChangeNotifier {
   @override
   void dispose() {
     detenerPolling();
+    _detenerEscuchaWebSocket();
     super.dispose();
   }
 }

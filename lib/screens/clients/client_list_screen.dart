@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -634,26 +634,26 @@ class ClientListItem extends StatelessWidget {
   Widget _buildProfileImage(String imagePath) {
     // Validar que el imagePath no esté vacío
     if (imagePath.isEmpty) {
-      debugPrint(' ImagePath está vacío, mostrando fallback');
-      return const Icon(Icons.person, color: Colors.green);
+      debugPrint('⚠️ ImagePath está vacío, mostrando fallback');
+      return _buildFallbackIcon();
     }
 
     // Usar ImageUtils para construir URLs de manera robusta
     final urls = ImageUtils.buildMultipleImageUrls(imagePath);
 
     if (urls.isEmpty) {
-      debugPrint(' No se pudieron generar URLs para la imagen: $imagePath');
-      return const Icon(Icons.person, color: Colors.green);
+      debugPrint('⚠️ No se pudieron generar URLs para la imagen: $imagePath');
+      return _buildFallbackIcon();
     }
 
-    debugPrint(' Intentando cargar imagen de perfil desde URLs: $urls');
+    debugPrint('🔍 Intentando cargar imagen de perfil desde URLs: $urls');
 
     return _ImageWithFallback(
       urls: urls,
       width: 50,
       height: 50,
       fit: BoxFit.cover,
-      fallbackWidget: const Icon(Icons.person, color: Colors.green),
+      fallbackWidget: _buildFallbackIcon(),
       loadingWidget: const Center(
         child: SizedBox(
           width: 20,
@@ -663,6 +663,22 @@ class ClientListItem extends StatelessWidget {
             valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFallbackIcon() {
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: const Icon(
+        Icons.person_outline,
+        color: Colors.green,
+        size: 28,
       ),
     );
   }
@@ -733,9 +749,9 @@ class _ImageWithFallbackState extends State<_ImageWithFallback> {
       },
       errorBuilder: (context, error, stackTrace) {
         debugPrint(
-          ' Error al cargar imagen desde: ${widget.urls[_currentUrlIndex]}',
+          '❌ Error al cargar imagen desde: ${widget.urls[_currentUrlIndex]}',
         );
-        debugPrint(' Error details: $error');
+        debugPrint('❌ Error details: $error');
 
         // Diferir setState para evitar llamar durante build
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -743,13 +759,18 @@ class _ImageWithFallbackState extends State<_ImageWithFallback> {
             setState(() {
               _currentUrlIndex++;
             });
-            debugPrint(' Intentando siguiente URL...');
+            debugPrint('🔄 Intentando siguiente URL...');
           } else {
-            debugPrint(' No hay más URLs disponibles, mostrando fallback');
+            debugPrint('⚠️ No hay más URLs disponibles, mostrando fallback');
           }
         });
 
-        // Retornar loading widget mientras se procesa el error
+        // Si es la última URL, mostrar fallback inmediatamente
+        if (_currentUrlIndex >= widget.urls.length - 1) {
+          return widget.fallbackWidget;
+        }
+        
+        // Retornar loading widget mientras se intenta la siguiente URL
         return widget.loadingWidget;
       },
     );

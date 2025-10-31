@@ -351,7 +351,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          Container(
+          SizedBox(
             height: 200,
             width: double.infinity,
             child: ClipRRect(
@@ -732,19 +732,19 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
   Widget _buildProfileImage(String imagePath) {
     // Validar que el imagePath no esté vacío
     if (imagePath.isEmpty) {
-      debugPrint(' ImagePath está vacío, mostrando fallback');
-      return const Icon(Icons.person, color: Colors.green);
+      debugPrint('⚠️ ImagePath está vacío, mostrando fallback');
+      return _buildFallbackAvatar();
     }
 
     // Usar ImageUtils para construir URLs de manera robusta
     final urls = ImageUtils.buildMultipleImageUrls(imagePath);
 
     if (urls.isEmpty) {
-      debugPrint(' No se pudieron generar URLs para la imagen: $imagePath');
-      return const Icon(Icons.person, color: Colors.green);
+      debugPrint('⚠️ No se pudieron generar URLs para la imagen: $imagePath');
+      return _buildFallbackAvatar();
     }
 
-    debugPrint(' Intentando cargar imagen de perfil desde URLs: $urls');
+    debugPrint('🔍 Intentando cargar imagen de perfil desde URLs: $urls');
 
     return GestureDetector(
       onTap: () => _showFullScreenImage(urls.first),
@@ -756,15 +756,7 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
             width: 112,
             height: 112,
             fit: BoxFit.cover,
-            fallbackWidget: Container(
-              width: 112,
-              height: 112,
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(56),
-              ),
-              child: const Icon(Icons.person, size: 56, color: Colors.green),
-            ),
+            fallbackWidget: _buildFallbackAvatar(),
             loadingWidget: Container(
               width: 112,
               height: 112,
@@ -798,6 +790,22 @@ class _ClientDetailScreenState extends State<ClientDetailScreen>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFallbackAvatar() {
+    return Container(
+      width: 112,
+      height: 112,
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(56),
+      ),
+      child: const Icon(
+        Icons.person_outline,
+        size: 56,
+        color: Colors.green,
       ),
     );
   }
@@ -933,9 +941,9 @@ class _ImageWithFallbackState extends State<_ImageWithFallback> {
               },
               errorBuilder: (context, error, stackTrace) {
                 debugPrint(
-                  ' Error al cargar imagen desde: ${widget.urls[_currentUrlIndex]}',
+                  '❌ Error al cargar imagen desde: ${widget.urls[_currentUrlIndex]}',
                 );
-                debugPrint(' Error details: $error');
+                debugPrint('❌ Error details: $error');
 
                 // Usar Future.microtask para evitar llamar setState durante build
                 Future.microtask(() {
@@ -944,18 +952,23 @@ class _ImageWithFallbackState extends State<_ImageWithFallback> {
                       _currentUrlIndex++;
                       _hasError = false;
                     });
-                    debugPrint(' Intentando siguiente URL...');
+                    debugPrint('🔄 Intentando siguiente URL...');
                   } else if (mounted) {
                     setState(() {
                       _hasError = true;
                     });
                     debugPrint(
-                      ' No hay más URLs disponibles, mostrando fallback',
+                      '⚠️ No hay más URLs disponibles, mostrando fallback',
                     );
                   }
                 });
 
-                // Retornar loading widget mientras se procesa el error
+                // Si es la última URL, mostrar fallback inmediatamente
+                if (_currentUrlIndex >= widget.urls.length - 1) {
+                  return widget.fallbackWidget;
+                }
+
+                // Retornar loading widget mientras se intenta la siguiente URL
                 return widget.loadingWidget;
               },
             ),

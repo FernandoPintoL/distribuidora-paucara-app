@@ -4,10 +4,7 @@ import '../../models/models.dart';
 class FechaHoraEntregaScreen extends StatefulWidget {
   final ClientAddress direccion;
 
-  const FechaHoraEntregaScreen({
-    Key? key,
-    required this.direccion,
-  }) : super(key: key);
+  const FechaHoraEntregaScreen({super.key, required this.direccion});
 
   @override
   State<FechaHoraEntregaScreen> createState() => _FechaHoraEntregaScreenState();
@@ -17,7 +14,8 @@ class _FechaHoraEntregaScreenState extends State<FechaHoraEntregaScreen> {
   DateTime? _fechaSeleccionada;
   TimeOfDay? _horaInicio;
   TimeOfDay? _horaFin;
-  final TextEditingController _observacionesController = TextEditingController();
+  final TextEditingController _observacionesController =
+      TextEditingController();
 
   @override
   void dispose() {
@@ -97,12 +95,28 @@ class _FechaHoraEntregaScreenState extends State<FechaHoraEntregaScreen> {
 
   String _formatearFecha(DateTime fecha) {
     final meses = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
     ];
 
     final dias = [
-      'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+      'Domingo',
     ];
 
     final diaSemana = dias[fecha.weekday - 1];
@@ -139,18 +153,12 @@ class _FechaHoraEntregaScreenState extends State<FechaHoraEntregaScreen> {
                 children: [
                   const Text(
                     '¿Cuándo deseas recibir tu pedido?',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 4),
                   const Text(
                     'Selecciona fecha y rango horario (opcional)',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ],
               ),
@@ -203,10 +211,7 @@ class _FechaHoraEntregaScreenState extends State<FechaHoraEntregaScreen> {
                   // Selección de fecha
                   const Text(
                     'Fecha programada',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   InkWell(
@@ -248,18 +253,12 @@ class _FechaHoraEntregaScreenState extends State<FechaHoraEntregaScreen> {
                   // Horario preferido
                   const Text(
                     'Horario preferido (opcional)',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   const Text(
                     'Especifica un rango horario para coordinar mejor la entrega',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 12),
 
@@ -364,17 +363,15 @@ class _FechaHoraEntregaScreenState extends State<FechaHoraEntregaScreen> {
                   // Observaciones
                   const Text(
                     'Observaciones (opcional)',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _observacionesController,
                     maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: 'Ej: Llamar antes de llegar, tocar el timbre, etc.',
+                      hintText:
+                          'Ej: Llamar antes de llegar, tocar el timbre, etc.',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -443,10 +440,7 @@ class _FechaHoraEntregaScreenState extends State<FechaHoraEntregaScreen> {
               ),
               child: const Text(
                 'Continuar al Resumen',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),

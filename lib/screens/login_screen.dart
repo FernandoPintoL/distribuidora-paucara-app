@@ -24,12 +24,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('LoginScreen.build() called');
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
+              debugPrint('LoginScreen Consumer builder called');
               return Form(
                 key: _formKey,
                 child: Column(

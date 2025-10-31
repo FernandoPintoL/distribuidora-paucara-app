@@ -8,10 +8,7 @@ import 'package:timeline_tile/timeline_tile.dart';
 class PedidoDetalleScreen extends StatefulWidget {
   final int pedidoId;
 
-  const PedidoDetalleScreen({
-    super.key,
-    required this.pedidoId,
-  });
+  const PedidoDetalleScreen({super.key, required this.pedidoId});
 
   @override
   State<PedidoDetalleScreen> createState() => _PedidoDetalleScreenState();
@@ -150,8 +147,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                   _buildSeccionProductos(pedido),
 
                   // Reservas de stock
-                  if (pedido.reservas.isNotEmpty)
-                    _buildSeccionReservas(pedido),
+                  if (pedido.reservas.isNotEmpty) _buildSeccionReservas(pedido),
 
                   // Resumen de montos
                   _buildSeccionResumen(pedido),
@@ -222,10 +218,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
         children: [
           Text(
             pedido.numero,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           Container(
@@ -237,11 +230,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  estadoInfo.icono,
-                  size: 20,
-                  color: Colors.white,
-                ),
+                Icon(estadoInfo.icono, size: 20, color: Colors.white),
                 const SizedBox(width: 8),
                 Text(
                   estadoInfo.nombre,
@@ -257,10 +246,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
           const SizedBox(height: 8),
           Text(
             estadoInfo.descripcion,
-            style: TextStyle(
-              color: Colors.grey.shade700,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
           ),
         ],
       ),
@@ -272,11 +258,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
       margin: const EdgeInsets.all(16),
       child: ElevatedButton.icon(
         onPressed: () {
-          Navigator.pushNamed(
-            context,
-            '/pedido-tracking',
-            arguments: pedido,
-          );
+          Navigator.pushNamed(context, '/pedido-tracking', arguments: pedido);
         },
         icon: const Icon(Icons.location_on, size: 28),
         label: const Text(
@@ -304,10 +286,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
         children: [
           const Text(
             'Historial de Estados',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           ...pedido.historialEstados.asMap().entries.map((entry) {
@@ -328,11 +307,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                     color: estadoInfo.color,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    estadoInfo.icono,
-                    color: Colors.white,
-                    size: 18,
-                  ),
+                  child: Icon(estadoInfo.icono, color: Colors.white, size: 18),
                 ),
               ),
               beforeLineStyle: LineStyle(
@@ -388,7 +363,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -405,10 +380,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
             children: [
               const Text(
                 'Información General',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const Divider(height: 24),
               _buildInfoRow(
@@ -450,10 +422,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
             children: [
               const Text(
                 'Dirección de Entrega',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const Divider(height: 24),
               Row(
@@ -476,22 +445,22 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        if (direccion.zona != null) ...[
+                        if (direccion.ciudad != null) ...[
                           const SizedBox(height: 4),
                           Text(
-                            'Zona: ${direccion.zona}',
+                            'Ciudad: ${direccion.ciudad}',
                             style: const TextStyle(color: Colors.grey),
                           ),
                         ],
-                        if (direccion.localidad?.nombre != null) ...[
+                        if (direccion.departamento != null) ...[
                           const SizedBox(height: 2),
                           Text(
-                            direccion.localidad!.nombre,
+                            direccion.departamento!,
                             style: const TextStyle(color: Colors.grey),
                           ),
                         ],
-                        if (direccion.referencia != null &&
-                            direccion.referencia!.isNotEmpty) ...[
+                        if (direccion.observaciones != null &&
+                            direccion.observaciones!.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -503,7 +472,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              'Ref: ${direccion.referencia}',
+                              'Obs: ${direccion.observaciones}',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.blue.shade900,
@@ -534,10 +503,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
             children: [
               const Text(
                 'Fecha Programada',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const Divider(height: 24),
               _buildInfoRow(
@@ -569,83 +535,82 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
         children: [
           const Text(
             'Productos',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          ...pedido.items.map((item) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  // Imagen
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(8),
+          ...pedido.items.map(
+            (item) => Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    // Imagen
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child:
+                          item.producto?.imagenes != null &&
+                              item.producto!.imagenes!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                item.producto!.imagenes!.first.url,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.image),
+                              ),
+                            )
+                          : const Icon(Icons.image, size: 32),
                     ),
-                    child: item.producto?.imagen != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              item.producto!.imagen!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  const Icon(Icons.image),
+                    const SizedBox(width: 12),
+
+                    // Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.producto?.nombre ?? 'Producto',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Cantidad: ${item.cantidad.toStringAsFixed(item.cantidad.truncateToDouble() == item.cantidad ? 0 : 2)}',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
                             ),
-                          )
-                        : const Icon(Icons.image, size: 32),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.producto?.nombre ?? 'Producto',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Cantidad: ${item.cantidad.toStringAsFixed(item.cantidad.truncateToDouble() == item.cantidad ? 0 : 2)}',
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 14,
+                          const SizedBox(height: 2),
+                          Text(
+                            'Bs. ${item.precioUnitario.toStringAsFixed(2)} c/u',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Bs. ${item.precioUnitario.toStringAsFixed(2)} c/u',
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
 
-                  // Subtotal
-                  Text(
-                    'Bs. ${item.subtotal.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                    // Subtotal
+                    Text(
+                      'Bs. ${item.subtotal.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -662,10 +627,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
             children: [
               const Text(
                 'Reservas de Stock',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const Divider(height: 24),
               ...pedido.reservas.map((reserva) {
@@ -680,15 +642,15 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                       color: estaVencida
                           ? Colors.red.shade50
                           : isActiva
-                              ? Colors.green.shade50
-                              : Colors.grey.shade50,
+                          ? Colors.green.shade50
+                          : Colors.grey.shade50,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: estaVencida
                             ? Colors.red.shade200
                             : isActiva
-                                ? Colors.green.shade200
-                                : Colors.grey.shade200,
+                            ? Colors.green.shade200
+                            : Colors.grey.shade200,
                       ),
                     ),
                     child: Column(
@@ -713,8 +675,8 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                             color: estaVencida
                                 ? Colors.red.shade700
                                 : isActiva
-                                    ? Colors.green.shade700
-                                    : Colors.grey.shade700,
+                                ? Colors.green.shade700
+                                : Colors.grey.shade700,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -742,10 +704,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
             children: [
               const Text(
                 'Resumen',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const Divider(height: 24),
               Row(
@@ -775,10 +734,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
                 children: [
                   const Text(
                     'Total',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   Text(
                     'Bs. ${pedido.total.toStringAsFixed(2)}',
@@ -808,16 +764,10 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
             children: [
               const Text(
                 'Observaciones',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const Divider(height: 24),
-              Text(
-                pedido.observaciones!,
-                style: const TextStyle(fontSize: 15),
-              ),
+              Text(pedido.observaciones!, style: const TextStyle(fontSize: 15)),
             ],
           ),
         ),
@@ -836,10 +786,7 @@ class _PedidoDetalleScreenState extends State<PedidoDetalleScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
               const SizedBox(height: 2),
               Text(

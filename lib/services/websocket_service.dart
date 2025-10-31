@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../config/websocket_config.dart';
 
 class WebSocketService {
@@ -8,7 +8,7 @@ class WebSocketService {
   factory WebSocketService() => _instance;
   WebSocketService._internal();
 
-  IO.Socket? _socket;
+  io.Socket? _socket;
   bool _isConnected = false;
   int _reconnectionAttempts = 0;
 
@@ -18,11 +18,15 @@ class WebSocketService {
   // Stream controllers para notificaciones
   final _proformaController = StreamController<Map<String, dynamic>>.broadcast();
   final _stockController = StreamController<Map<String, dynamic>>.broadcast();
+  final _envioController = StreamController<Map<String, dynamic>>.broadcast();
+  final _ubicacionController = StreamController<Map<String, dynamic>>.broadcast();
   final _connectionController = StreamController<bool>.broadcast();
 
   // Getters de streams
   Stream<Map<String, dynamic>> get proformaStream => _proformaController.stream;
   Stream<Map<String, dynamic>> get stockStream => _stockController.stream;
+  Stream<Map<String, dynamic>> get envioStream => _envioController.stream;
+  Stream<Map<String, dynamic>> get ubicacionStream => _ubicacionController.stream;
   Stream<bool> get connectionStream => _connectionController.stream;
 
   bool get isConnected => _isConnected;
@@ -41,9 +45,11 @@ class WebSocketService {
     try {
       debugPrint('🔌 Conectando a WebSocket: ${WebSocketConfig.currentUrl}');
 
-      _socket = IO.io(
+      final connectionCompleter = Completer<void>();
+
+      _socket = io.io(
         WebSocketConfig.currentUrl,
-        IO.OptionBuilder()
+        io.OptionBuilder()
             .setTransports(['websocket']) // Forzar WebSocket (no polling)
             .disableAutoConnect() // Conectar manualmente
             .setTimeout(WebSocketConfig.connectionTimeout.inMilliseconds)
@@ -55,6 +61,21 @@ class WebSocketService {
             .build(),
       );
 
+      // Listener temporal para la conexión inicial
+      _socket!.onConnect((_) {
+        debugPrint('🔌 Socket conectado (inicial)');
+        if (!connectionCompleter.isCompleted) {
+          connectionCompleter.complete();
+        }
+      });
+
+      _socket!.onConnectError((data) {
+        debugPrint('❌ Error de conexión (inicial): $data');
+        if (!connectionCompleter.isCompleted) {
+          connectionCompleter.completeError(Exception('Error de conexión: $data'));
+        }
+      });
+
       // Configurar listeners de conexión
       _setupConnectionListeners();
 
@@ -65,7 +86,7 @@ class WebSocketService {
       _socket!.connect();
 
       // Esperar a que conecte
-      await _socket!.onConnect.first.timeout(
+      await connectionCompleter.future.timeout(
         WebSocketConfig.connectionTimeout,
         onTimeout: () {
           throw TimeoutException('Timeout al conectar a WebSocket');
@@ -243,6 +264,70 @@ class WebSocketService {
       debugPrint('💰 Pago confirmado: $data');
       _handleEvent(WebSocketConfig.eventPaymentConfirmed, data);
     });
+
+    // Eventos de Envíos/Logística
+    _socket!.on(WebSocketConfig.eventEnvioProgramado, (data) {
+      debugPrint('📅 Envío programado: $data');
+      _envioController.add({
+        'type': 'programado',
+        'data': data,
+      });
+      _handleEvent(WebSocketConfig.eventEnvioProgramado, data);
+    });
+
+    _socket!.on(WebSocketConfig.eventEnvioEnPreparacion, (data) {
+      debugPrint('📦 Envío en preparación: $data');
+      _envioController.add({
+        'type': 'en_preparacion',
+        'data': data,
+      });
+      _handleEvent(WebSocketConfig.eventEnvioEnPreparacion, data);
+    });
+
+    _socket!.on(WebSocketConfig.eventEnvioEnRuta, (data) {
+      debugPrint('🚛 Envío en ruta: $data');
+      _envioController.add({
+        'type': 'en_ruta',
+        'data': data,
+      });
+      _handleEvent(WebSocketConfig.eventEnvioEnRuta, data);
+    });
+
+    _socket!.on(WebSocketConfig.eventUbicacionActualizada, (data) {
+      debugPrint('📍 Ubicación actualizada: ${data['coordenadas']}');
+      _ubicacionController.add({
+        'type': 'ubicacion',
+        'data': data,
+      });
+      _handleEvent(WebSocketConfig.eventUbicacionActualizada, data);
+    });
+
+    _socket!.on(WebSocketConfig.eventEnvioProximo, (data) {
+      debugPrint('⏰ Envío próximo: ${data['tiempo_estimado_min']} min');
+      _envioController.add({
+        'type': 'proximo',
+        'data': data,
+      });
+      _handleEvent(WebSocketConfig.eventEnvioProximo, data);
+    });
+
+    _socket!.on(WebSocketConfig.eventEnvioEntregado, (data) {
+      debugPrint('✅ Envío entregado: $data');
+      _envioController.add({
+        'type': 'entregado',
+        'data': data,
+      });
+      _handleEvent(WebSocketConfig.eventEnvioEntregado, data);
+    });
+
+    _socket!.on(WebSocketConfig.eventEntregaRechazada, (data) {
+      debugPrint('❌ Entrega rechazada: ${data['motivo']}');
+      _envioController.add({
+        'type': 'rechazada',
+        'data': data,
+      });
+      _handleEvent(WebSocketConfig.eventEntregaRechazada, data);
+    });
   }
 
   /// Registrar callback para evento específico
@@ -278,6 +363,8 @@ class WebSocketService {
     disconnect();
     _proformaController.close();
     _stockController.close();
+    _envioController.close();
+    _ubicacionController.close();
     _connectionController.close();
     _eventHandlers.clear();
   }

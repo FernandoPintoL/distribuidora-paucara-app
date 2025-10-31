@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import '../models/models.dart';
 import '../services/services.dart';
@@ -252,16 +251,19 @@ class AuthProvider with ChangeNotifier {
     }
 
     // Conectar en segundo plano, no bloquear la UI
-    _wsService.connect(
-      token: token,
-      userId: _user!.id,
-      userType: 'cliente', // o determinar según el rol del usuario
-    ).then((_) {
-      debugPrint('✅ WebSocket conectado para usuario ${_user!.name}');
-    }).catchError((error) {
-      debugPrint('❌ Error conectando WebSocket: $error');
-      // No fallar el login si el WebSocket no se conecta
-    });
+    _wsService
+        .connect(
+          token: token,
+          userId: _user!.id,
+          userType: 'cliente', // o determinar según el rol del usuario
+        )
+        .then((_) {
+          debugPrint('✅ WebSocket conectado para usuario ${_user!.name}');
+        })
+        .catchError((error) {
+          debugPrint('❌ Error conectando WebSocket: $error');
+          // No fallar el login si el WebSocket no se conecta
+        });
   }
 
   // Check if user has specific permission

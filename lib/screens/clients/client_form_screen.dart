@@ -101,7 +101,8 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
       if (dirObs != null && dirObs.isNotEmpty) {
         _locationObservationsController.text = dirObs;
         if (_observationsController.text.isNotEmpty) {
-          _observationsController.text = '${_observationsController.text}\n\nObservaciones de dirección: $dirObs';
+          _observationsController.text =
+              '${_observationsController.text}\n\nObservaciones de dirección: $dirObs';
         } else {
           _observationsController.text = dirObs;
         }
@@ -146,7 +147,9 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
         if (!_isEditing && _selectedCategoriasIds.isEmpty) {
           try {
             final appCat = _categoriasCatalogo.firstWhere(
-              (c) => (c.clave?.toUpperCase() == 'APP') || (c.nombre?.toUpperCase() == 'APP'),
+              (c) =>
+                  (c.clave?.toUpperCase() == 'APP') ||
+                  (c.nombre?.toUpperCase() == 'APP'),
             );
             _selectedCategoriasIds.add(appCat.id);
           } catch (_) {
@@ -351,9 +354,9 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                                 items: _localidades,
                                 value: _selectedLocationId != null
                                     ? _localidades.firstWhere(
-                                      (localidad) =>
-                                  localidad.id == _selectedLocationId,
-                                )
+                                        (localidad) =>
+                                            localidad.id == _selectedLocationId,
+                                      )
                                     : null,
                                 displayString: (localidad) => localidad.nombre,
                                 onChanged: (localidad) {
@@ -382,7 +385,7 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                               decoration: const InputDecoration(
                                 labelText: 'Observaciones del lugar',
                                 hintText:
-                                'Ingrese observaciones sobre la ubicación del cliente',
+                                    'Ingrese observaciones sobre la ubicación del cliente',
                                 prefixIcon: Icon(Icons.note),
                               ),
                               maxLines: 3,
@@ -399,14 +402,22 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                           children: [
                             if (_ventanasEntrega.isNotEmpty)
                               Column(
-                                children: _ventanasEntrega
-                                    .asMap()
-                                    .entries
-                                    .map((entry) {
+                                children: _ventanasEntrega.asMap().entries.map((
+                                  entry,
+                                ) {
                                   final i = entry.key;
                                   final v = entry.value;
-                                  final days = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-                                  final day = (v.diaSemana >= 0 && v.diaSemana <= 6)
+                                  final days = [
+                                    'Dom',
+                                    'Lun',
+                                    'Mar',
+                                    'Mié',
+                                    'Jue',
+                                    'Vie',
+                                    'Sáb',
+                                  ];
+                                  final day =
+                                      (v.diaSemana >= 0 && v.diaSemana <= 6)
                                       ? days[v.diaSemana]
                                       : 'Día ${v.diaSemana}';
                                   return Card(
@@ -414,21 +425,36 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                                     child: ListTile(
                                       leading: Icon(
                                         Icons.calendar_today,
-                                        color: v.activo ? Colors.green : Colors.grey,
+                                        color: v.activo
+                                            ? Colors.green
+                                            : Colors.grey,
                                       ),
-                                      title: Text('$day: ${v.horaInicio} - ${v.horaFin}'),
+                                      title: Text(
+                                        '$day: ${v.horaInicio} - ${v.horaFin}',
+                                      ),
                                       subtitle: v.activo
                                           ? null
-                                          : const Text('Inactivo', style: TextStyle(color: Colors.grey)),
+                                          : const Text(
+                                              'Inactivo',
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                              ),
+                                            ),
                                       trailing: IconButton(
-                                        icon: const Icon(Icons.delete, color: Colors.red),
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
                                         onPressed: () {
                                           setState(() {
                                             _ventanasEntrega.removeAt(i);
                                           });
                                         },
                                       ),
-                                      onTap: () => _showVentanaDialog(initial: v, index: i),
+                                      onTap: () => _showVentanaDialog(
+                                        initial: v,
+                                        index: i,
+                                      ),
                                     ),
                                   );
                                 }).toList(),
@@ -458,15 +484,23 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                           icon: Icons.category,
                           children: [
                             if (_categoriasCatalogo.isEmpty)
-                              const Text('No hay categorías disponibles', style: TextStyle(color: Colors.grey))
+                              const Text(
+                                'No hay categorías disponibles',
+                                style: TextStyle(color: Colors.grey),
+                              )
                             else
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
                                 children: _categoriasCatalogo.map((cat) {
-                                  final selected = _selectedCategoriasIds.contains(cat.id);
+                                  final selected = _selectedCategoriasIds
+                                      .contains(cat.id);
                                   return FilterChip(
-                                    label: Text(cat.nombre ?? cat.clave ?? 'Cat ${cat.id}'),
+                                    label: Text(
+                                      cat.nombre ??
+                                          cat.clave ??
+                                          'Cat ${cat.id}',
+                                    ),
                                     selected: selected,
                                     onSelected: (val) {
                                       setState(() {
@@ -507,7 +541,7 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                                   value: _isActive,
                                   onChanged: (value) =>
                                       setState(() => _isActive = value),
-                                  activeColor: Theme.of(
+                                  activeThumbColor: Theme.of(
                                     context,
                                   ).colorScheme.primary,
                                 ),
@@ -547,7 +581,7 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                                   value: _createUser,
                                   onChanged: (value) =>
                                       setState(() => _createUser = value),
-                                  activeColor: Theme.of(
+                                  activeThumbColor: Theme.of(
                                     context,
                                   ).colorScheme.primary,
                                 ),
@@ -654,7 +688,7 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
   }
 
   Future<void> _saveClient() async {
-    debugPrint('Iniciando _saveClient - isEditing: ${_isEditing}');
+    debugPrint('Iniciando _saveClient - isEditing: $_isEditing');
     if (!_formKey.currentState!.validate()) {
       debugPrint('Validación del formulario fallida');
       return;
@@ -690,29 +724,31 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
           longitud: _longitude,
           localidadId: _selectedLocationId,
           ventanasEntrega: _ventanasEntrega,
-          categoriasIds: _selectedCategoriasIds.isNotEmpty ? _selectedCategoriasIds.toList() : null,
+          categoriasIds: _selectedCategoriasIds.isNotEmpty
+              ? _selectedCategoriasIds.toList()
+              : null,
           //crear usuario solo si se seleccionó y no está editando
           crearUsuario: _createUser,
           direcciones: _addressController.text.isNotEmpty
               ? [
-            ClientAddress(
-              id: null,
-              direccion: _addressController.text,
-              observaciones:
-              _locationObservationsController.text.isNotEmpty
-                  ? _locationObservationsController.text
-                  : null,
-              ciudad: null, // Se puede agregar después si es necesario
-              departamento:
-              null, // Se puede agregar después si es necesario
-              codigoPostal:
-              null, // Se puede agregar después si es necesario
-              esPrincipal: true,
-              activa: true,
-              latitud: _latitude, // ✅ Coordenadas GPS en la dirección
-              longitud: _longitude, // ✅ Coordenadas GPS en la dirección
-            ),
-          ]
+                  ClientAddress(
+                    id: null,
+                    direccion: _addressController.text,
+                    observaciones:
+                        _locationObservationsController.text.isNotEmpty
+                        ? _locationObservationsController.text
+                        : null,
+                    ciudad: null, // Se puede agregar después si es necesario
+                    departamento:
+                        null, // Se puede agregar después si es necesario
+                    codigoPostal:
+                        null, // Se puede agregar después si es necesario
+                    esPrincipal: true,
+                    activa: true,
+                    latitud: _latitude, // ✅ Coordenadas GPS en la dirección
+                    longitud: _longitude, // ✅ Coordenadas GPS en la dirección
+                  ),
+                ]
               : [],
         );
       } else {
@@ -757,7 +793,9 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                 ]
               : [],
           ventanasEntrega: _ventanasEntrega,
-          categoriasIds: _selectedCategoriasIds.isNotEmpty ? _selectedCategoriasIds.toList() : null,
+          categoriasIds: _selectedCategoriasIds.isNotEmpty
+              ? _selectedCategoriasIds.toList()
+              : null,
           fotoPerfil: _selectedProfilePhoto,
         );
       }
@@ -857,10 +895,15 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
   }
 
   // Dialog para agregar/editar ventanas de entrega
-  Future<void> _showVentanaDialog({VentanaEntregaCliente? initial, int? index}) async {
+  Future<void> _showVentanaDialog({
+    VentanaEntregaCliente? initial,
+    int? index,
+  }) async {
     int day = initial?.diaSemana ?? 1;
-    TimeOfDay start = _parseTime(initial?.horaInicio) ?? const TimeOfDay(hour: 8, minute: 0);
-    TimeOfDay end = _parseTime(initial?.horaFin) ?? const TimeOfDay(hour: 12, minute: 0);
+    TimeOfDay start =
+        _parseTime(initial?.horaInicio) ?? const TimeOfDay(hour: 8, minute: 0);
+    TimeOfDay end =
+        _parseTime(initial?.horaFin) ?? const TimeOfDay(hour: 12, minute: 0);
     bool active = initial?.activo ?? true;
 
     await showDialog(
@@ -869,18 +912,25 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
         return StatefulBuilder(
           builder: (context, setLocalState) {
             return AlertDialog(
-              title: Text('${index == null ? 'Agregar' : 'Editar'} ventana de entrega'),
+              title: Text(
+                '${index == null ? 'Agregar' : 'Editar'} ventana de entrega',
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   DropdownButtonFormField<int>(
-                    value: day,
-                    decoration: const InputDecoration(labelText: 'Día de la semana'),
+                    initialValue: day,
+                    decoration: const InputDecoration(
+                      labelText: 'Día de la semana',
+                    ),
                     items: [
                       const DropdownMenuItem(value: 0, child: Text('Domingo')),
                       const DropdownMenuItem(value: 1, child: Text('Lunes')),
                       const DropdownMenuItem(value: 2, child: Text('Martes')),
-                      const DropdownMenuItem(value: 3, child: Text('Miércoles')),
+                      const DropdownMenuItem(
+                        value: 3,
+                        child: Text('Miércoles'),
+                      ),
                       const DropdownMenuItem(value: 4, child: Text('Jueves')),
                       const DropdownMenuItem(value: 5, child: Text('Viernes')),
                       const DropdownMenuItem(value: 6, child: Text('Sábado')),
@@ -893,8 +943,12 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () async {
-                            final picked = await showTimePicker(context: context, initialTime: start);
-                            if (picked != null) setLocalState(() => start = picked);
+                            final picked = await showTimePicker(
+                              context: context,
+                              initialTime: start,
+                            );
+                            if (picked != null)
+                              setLocalState(() => start = picked);
                           },
                           child: Text('Inicio: ${_formatTimeOfDay(start)}'),
                         ),
@@ -903,8 +957,12 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () async {
-                            final picked = await showTimePicker(context: context, initialTime: end);
-                            if (picked != null) setLocalState(() => end = picked);
+                            final picked = await showTimePicker(
+                              context: context,
+                              initialTime: end,
+                            );
+                            if (picked != null)
+                              setLocalState(() => end = picked);
                           },
                           child: Text('Fin: ${_formatTimeOfDay(end)}'),
                         ),
@@ -931,7 +989,11 @@ class _ClientFormScreenState extends State<ClientFormScreen> {
                     final endMinutes = end.hour * 60 + end.minute;
                     if (endMinutes <= startMinutes) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('La hora de fin debe ser mayor que la de inicio')),
+                        const SnackBar(
+                          content: Text(
+                            'La hora de fin debe ser mayor que la de inicio',
+                          ),
+                        ),
                       );
                       return;
                     }

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import '../models/carrito.dart';
 import '../models/carrito_item.dart';
@@ -23,7 +22,11 @@ class CarritoProvider with ChangeNotifier {
   String? get errorMessage => _errorMessage;
 
   // Agregar producto al carrito
-  void agregarProducto(Product producto, {double cantidad = 1.0, String? observaciones}) {
+  void agregarProducto(
+    Product producto, {
+    double cantidad = 1.0,
+    String? observaciones,
+  }) {
     _errorMessage = null;
 
     // Verificar si el producto ya está en el carrito
@@ -33,17 +36,21 @@ class CarritoProvider with ChangeNotifier {
 
     if (itemExistente != null) {
       // Si ya existe, actualizar la cantidad
-      final index = nuevosItems.indexWhere((item) => item.producto.id == producto.id);
+      final index = nuevosItems.indexWhere(
+        (item) => item.producto.id == producto.id,
+      );
       nuevosItems[index] = itemExistente.copyWith(
         cantidad: itemExistente.cantidad + cantidad,
       );
     } else {
       // Si no existe, agregarlo
-      nuevosItems.add(CarritoItem(
-        producto: producto,
-        cantidad: cantidad,
-        observaciones: observaciones,
-      ));
+      nuevosItems.add(
+        CarritoItem(
+          producto: producto,
+          cantidad: cantidad,
+          observaciones: observaciones,
+        ),
+      );
     }
 
     _carrito = _carrito.copyWith(items: nuevosItems);
@@ -64,7 +71,9 @@ class CarritoProvider with ChangeNotifier {
     if (itemExistente == null) return;
 
     List<CarritoItem> nuevosItems = List.from(_carrito.items);
-    final index = nuevosItems.indexWhere((item) => item.producto.id == productoId);
+    final index = nuevosItems.indexWhere(
+      (item) => item.producto.id == productoId,
+    );
 
     nuevosItems[index] = itemExistente.copyWith(cantidad: nuevaCantidad);
 
@@ -115,7 +124,9 @@ class CarritoProvider with ChangeNotifier {
     if (itemExistente == null) return;
 
     List<CarritoItem> nuevosItems = List.from(_carrito.items);
-    final index = nuevosItems.indexWhere((item) => item.producto.id == productoId);
+    final index = nuevosItems.indexWhere(
+      (item) => item.producto.id == productoId,
+    );
 
     nuevosItems[index] = itemExistente.copyWith(observaciones: observaciones);
 
@@ -166,16 +177,22 @@ class CarritoProvider with ChangeNotifier {
 
     try {
       // Preparar items para verificación
-      final itemsParaVerificar = _carrito.items.map((item) => {
-        'producto_id': item.producto.id,
-        'cantidad': item.cantidad,
-      }).toList();
+      final itemsParaVerificar = _carrito.items
+          .map(
+            (item) => {
+              'producto_id': item.producto.id,
+              'cantidad': item.cantidad,
+            },
+          )
+          .toList();
 
       // TODO: Implementar cuando el endpoint de verificación esté disponible
       // final response = await _productService.verificarStock(itemsParaVerificar);
 
       // Por ahora retornamos true
-      debugPrint('Verificando stock para ${itemsParaVerificar.length} productos...');
+      debugPrint(
+        'Verificando stock para ${itemsParaVerificar.length} productos...',
+      );
 
       // Simulamos una verificación exitosa
       _isLoading = false;
@@ -183,7 +200,6 @@ class CarritoProvider with ChangeNotifier {
         notifyListeners();
       });
       return true;
-
     } catch (e) {
       _errorMessage = 'Error al verificar stock: ${e.toString()}';
       _isLoading = false;

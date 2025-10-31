@@ -4,11 +4,14 @@ import 'package:provider/provider.dart';
 import 'models/models.dart';
 import 'providers/providers.dart';
 import 'screens/screens.dart';
+import 'widgets/realtime_notifications_listener.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('🌍 App starting...');
   // Load environment variables before initializing services/UI
   await dotenv.load(fileName: ".env");
+  debugPrint('✅ .env loaded');
 
   runApp(
     MultiProvider(
@@ -35,6 +38,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
+        scaffoldBackgroundColor: Colors.white,
         appBarTheme: const AppBarTheme(centerTitle: true, elevation: 2),
         cardTheme: CardThemeData(
           elevation: 4,
@@ -188,19 +192,44 @@ class _AuthWrapperState extends State<AuthWrapper> {
         debugPrint(
           '🔄 AuthWrapper build - isLoading: ${authProvider.isLoading}, isLoggedIn: ${authProvider.isLoggedIn}',
         );
+
+        // Build the appropriate screen
+        late Widget screen;
+
         if (authProvider.isLoading) {
-          return const Scaffold(
+          debugPrint('⏳ Loading...');
+          screen = const Scaffold(
+            backgroundColor: Colors.white,
             body: Center(child: CircularProgressIndicator()),
           );
-        }
+        } else if (authProvider.isLoggedIn) {
+          // Check user role to show appropriate screen
+          final user = authProvider.user;
+          final roles = user?.roles ?? [];
 
-        if (authProvider.isLoggedIn) {
-          debugPrint('🏠 Navigating to ClientListScreen');
-          return const ClientListScreen();
+          // Case-insensitive role check (backend sends 'Cliente' with capital C)
+          final isCliente = roles.any((role) => role.toLowerCase() == 'cliente');
+
+          Widget homeScreen;
+          if (isCliente) {
+            debugPrint('🏠 Navigating to HomeClienteScreen (cliente role: $roles)');
+            homeScreen = const HomeClienteScreen();
+          } else {
+            debugPrint('🏠 Navigating to ClientListScreen (preventista/chofer role: $roles)');
+            homeScreen = const ClientListScreen();
+          }
+
+          // Wrap with RealtimeNotificationsListener for WebSocket notifications
+          screen = RealtimeNotificationsListener(child: homeScreen);
         } else {
           debugPrint('🔐 Navigating to LoginScreen');
-          return const LoginScreen();
+          screen = const LoginScreen();
         }
+
+        // Wrap with Material and ensure it renders
+        return Scaffold(
+          body: screen,
+        );
       },
     );
   }

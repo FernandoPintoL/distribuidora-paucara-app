@@ -4,7 +4,7 @@ class User {
   final int id;
   final String name;
   final String usernick;
-  final String email;
+  final String? email;
   final bool activo;
   List<String>? roles;
   List<String>? permissions;
@@ -13,7 +13,7 @@ class User {
     required this.id,
     required this.name,
     required this.usernick,
-    required this.email,
+    this.email,
     required this.activo,
     this.roles,
     this.permissions,

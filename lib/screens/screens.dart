@@ -2,6 +2,7 @@ export 'login_screen.dart';
 export 'home_screen.dart';
 export 'products/product_list_screen.dart';
 export 'clients/client_list_screen.dart';
+export 'cliente/home_cliente_screen.dart';
 export 'carrito/carrito_screen.dart';
 export 'pedidos/direccion_entrega_seleccion_screen.dart';
 export 'pedidos/fecha_hora_entrega_screen.dart';

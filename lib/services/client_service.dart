@@ -35,6 +35,9 @@ class ClientService {
         queryParameters: queryParams,
       );
 
+      debugPrint('📥 Response data type: ${response.data.runtimeType}');
+      debugPrint('📥 Response data: ${response.data}');
+
       return PaginatedResponse<Client>.fromJson(
         response.data,
         (json) => Client.fromJson(json),
@@ -46,6 +49,7 @@ class ClientService {
         data: null,
       );
     } catch (e) {
+      debugPrint('❌ Error en getClients: $e');
       return PaginatedResponse<Client>(
         success: false,
         message: 'Error inesperado: ${e.toString()}',
@@ -181,24 +185,31 @@ class ClientService {
         formData.fields.add(MapEntry('razon_social', razonSocial ?? ''));
         if (nit != null) formData.fields.add(MapEntry('nit', nit));
         if (email != null) formData.fields.add(MapEntry('email', email));
-        if (telefono != null)
+        if (telefono != null) {
           formData.fields.add(MapEntry('telefono', telefono));
-        if (limiteCredito != null)
+        }
+        if (limiteCredito != null) {
           formData.fields.add(
             MapEntry('limite_credito', limiteCredito.toString()),
           );
-        if (localidadId != null)
+        }
+        if (localidadId != null) {
           formData.fields.add(MapEntry('localidad_id', localidadId.toString()));
-        if (latitud != null)
+        }
+        if (latitud != null) {
           formData.fields.add(MapEntry('latitud', latitud.toString()));
-        if (longitud != null)
+        }
+        if (longitud != null) {
           formData.fields.add(MapEntry('longitud', longitud.toString()));
-        if (observaciones != null)
+        }
+        if (observaciones != null) {
           formData.fields.add(MapEntry('observaciones', observaciones));
-        if (crearUsuario != null)
+        }
+        if (crearUsuario != null) {
           formData.fields.add(
             MapEntry('crear_usuario', crearUsuario ? '1' : '0'),
           );
+        }
 
         // Booleans en multipart: enviar como '1'/'0' para compatibilidad con Laravel boolean
         formData.fields.add(MapEntry('activo', activo ? '1' : '0'));
@@ -210,10 +221,12 @@ class ClientService {
             direcciones.isNotEmpty &&
             direcciones.any((d) => d.latitud != null && d.longitud != null);
 
-        if (latitud != null && !hasAddressCoords)
+        if (latitud != null && !hasAddressCoords) {
           formData.fields.add(MapEntry('latitud', latitud.toString()));
-        if (longitud != null && !hasAddressCoords)
+        }
+        if (longitud != null && !hasAddressCoords) {
           formData.fields.add(MapEntry('longitud', longitud.toString()));
+        }
 
         // Agregar direcciones como campos separados con índices
         if (direcciones != null && direcciones.isNotEmpty) {
@@ -222,18 +235,21 @@ class ClientService {
             formData.fields.add(
               MapEntry('direcciones[$i][direccion]', dir.direccion),
             );
-            if (dir.ciudad != null)
+            if (dir.ciudad != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][ciudad]', dir.ciudad!),
               );
-            if (dir.departamento != null)
+            }
+            if (dir.departamento != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][departamento]', dir.departamento!),
               );
-            if (dir.codigoPostal != null)
+            }
+            if (dir.codigoPostal != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][codigo_postal]', dir.codigoPostal!),
               );
+            }
             formData.fields.add(
               MapEntry(
                 'direcciones[$i][es_principal]',
@@ -246,18 +262,21 @@ class ClientService {
                 (dir.activa ?? true) ? '1' : '0',
               ),
             );
-            if (dir.observaciones != null)
+            if (dir.observaciones != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][observaciones]', dir.observaciones!),
               );
-            if (dir.latitud != null)
+            }
+            if (dir.latitud != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][latitud]', dir.latitud!.toString()),
               );
-            if (dir.longitud != null)
+            }
+            if (dir.longitud != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][longitud]', dir.longitud!.toString()),
               );
+            }
           }
           print(
             '📤 Enviando ${direcciones.length} direcciones como campos separados',
@@ -431,9 +450,10 @@ class ClientService {
 
       if (activo != null) data['activo'] = activo;
       if (observaciones != null) data['observaciones'] = observaciones;
-      if (direcciones != null)
+      if (direcciones != null) {
         data['direcciones'] = direcciones.map((d) => d.toJson()).toList();
-      if (ventanasEntrega != null)
+      }
+      if (ventanasEntrega != null) {
         data['ventanas_entrega'] = ventanasEntrega
             .map(
               (v) => {
@@ -444,6 +464,7 @@ class ClientService {
               },
             )
             .toList();
+      }
       if (categoriasIds != null) data['categorias_ids'] = categoriasIds;
       if (crearUsuario != null) data['crear_usuario'] = crearUsuario;
 
@@ -462,32 +483,41 @@ class ClientService {
           'Agregando campos de texto al FormData..................??$nombre',
         );
         if (nombre != null) formData.fields.add(MapEntry('nombre', nombre));
-        if (razonSocial != null)
+        if (razonSocial != null) {
           formData.fields.add(MapEntry('razon_social', razonSocial));
+        }
         if (nit != null) formData.fields.add(MapEntry('nit', nit));
         if (email != null) formData.fields.add(MapEntry('email', email));
-        if (telefono != null)
+        if (telefono != null) {
           formData.fields.add(MapEntry('telefono', telefono));
-        if (limiteCredito != null)
+        }
+        if (limiteCredito != null) {
           formData.fields.add(
             MapEntry('limite_credito', limiteCredito.toString()),
           );
-        if (localidadId != null)
+        }
+        if (localidadId != null) {
           formData.fields.add(MapEntry('localidad_id', localidadId.toString()));
-        if (latitud != null)
+        }
+        if (latitud != null) {
           formData.fields.add(MapEntry('latitud', latitud.toString()));
-        if (longitud != null)
+        }
+        if (longitud != null) {
           formData.fields.add(MapEntry('longitud', longitud.toString()));
-        if (observaciones != null)
+        }
+        if (observaciones != null) {
           formData.fields.add(MapEntry('observaciones', observaciones));
-        if (crearUsuario != null)
+        }
+        if (crearUsuario != null) {
           formData.fields.add(
             MapEntry('crear_usuario', crearUsuario ? '1' : '0'),
           );
+        }
 
         // Booleans en multipart: enviar como '1'/'0' para compatibilidad con Laravel boolean
-        if (activo != null)
+        if (activo != null) {
           formData.fields.add(MapEntry('activo', activo ? '1' : '0'));
+        }
         print(
           '📤 Enviando activo como string (1/0): ${activo == true ? '1' : '0'}',
         );
@@ -498,10 +528,12 @@ class ClientService {
             direcciones.isNotEmpty &&
             direcciones.any((d) => d.latitud != null && d.longitud != null);
 
-        if (latitud != null && !hasAddressCoords)
+        if (latitud != null && !hasAddressCoords) {
           formData.fields.add(MapEntry('latitud', latitud.toString()));
-        if (longitud != null && !hasAddressCoords)
+        }
+        if (longitud != null && !hasAddressCoords) {
           formData.fields.add(MapEntry('longitud', longitud.toString()));
+        }
 
         // Agregar direcciones como campos separados con índices
         if (direcciones != null && direcciones.isNotEmpty) {
@@ -510,18 +542,21 @@ class ClientService {
             formData.fields.add(
               MapEntry('direcciones[$i][direccion]', dir.direccion),
             );
-            if (dir.ciudad != null)
+            if (dir.ciudad != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][ciudad]', dir.ciudad!),
               );
-            if (dir.departamento != null)
+            }
+            if (dir.departamento != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][departamento]', dir.departamento!),
               );
-            if (dir.codigoPostal != null)
+            }
+            if (dir.codigoPostal != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][codigo_postal]', dir.codigoPostal!),
               );
+            }
             formData.fields.add(
               MapEntry(
                 'direcciones[$i][es_principal]',
@@ -534,18 +569,21 @@ class ClientService {
                 (dir.activa ?? true) ? '1' : '0',
               ),
             );
-            if (dir.observaciones != null)
+            if (dir.observaciones != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][observaciones]', dir.observaciones!),
               );
-            if (dir.latitud != null)
+            }
+            if (dir.latitud != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][latitud]', dir.latitud!.toString()),
               );
-            if (dir.longitud != null)
+            }
+            if (dir.longitud != null) {
               formData.fields.add(
                 MapEntry('direcciones[$i][longitud]', dir.longitud!.toString()),
               );
+            }
           }
           print(
             '📤 Enviando ${direcciones.length} direcciones como campos separados',

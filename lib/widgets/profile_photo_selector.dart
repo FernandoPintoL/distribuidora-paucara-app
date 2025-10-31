@@ -146,21 +146,21 @@ class _ProfilePhotoSelectorState extends State<ProfilePhotoSelector> {
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
               ? Colors.grey[800]
-              : Colors.grey[200],
+              : Colors.green.shade50,
           shape: BoxShape.circle,
           border: Border.all(
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.grey[600]!
-                : Colors.grey[300]!,
+                : Colors.green.shade200,
             width: 2,
           ),
         ),
         child: Icon(
-          Icons.person,
+          Icons.person_outline,
           size: widget.size * 0.5,
           color: Theme.of(context).brightness == Brightness.dark
               ? Colors.grey[400]
-              : Colors.grey[500],
+              : Colors.green,
         ),
       );
     }
@@ -184,21 +184,21 @@ class _ProfilePhotoSelectorState extends State<ProfilePhotoSelector> {
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
               ? Colors.grey[800]
-              : Colors.grey[200],
+              : Colors.orange.shade50,
           shape: BoxShape.circle,
           border: Border.all(
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.grey[600]!
-                : Colors.grey[300]!,
+                : Colors.orange.shade200,
             width: 2,
           ),
         ),
         child: Icon(
-          Icons.broken_image,
+          Icons.image_not_supported_outlined,
           size: widget.size * 0.5,
           color: Theme.of(context).brightness == Brightness.dark
               ? Colors.grey[400]
-              : Colors.grey[500],
+              : Colors.orange,
         ),
       );
     }

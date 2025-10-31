@@ -36,11 +36,13 @@ class PedidoService {
       }
 
       if (horaInicio != null) {
-        requestBody['hora_inicio_preferida'] = '${horaInicio.hour.toString().padLeft(2, '0')}:${horaInicio.minute.toString().padLeft(2, '0')}';
+        requestBody['hora_inicio_preferida'] =
+            '${horaInicio.hour.toString().padLeft(2, '0')}:${horaInicio.minute.toString().padLeft(2, '0')}';
       }
 
       if (horaFin != null) {
-        requestBody['hora_fin_preferida'] = '${horaFin.hour.toString().padLeft(2, '0')}:${horaFin.minute.toString().padLeft(2, '0')}';
+        requestBody['hora_fin_preferida'] =
+            '${horaFin.hour.toString().padLeft(2, '0')}:${horaFin.minute.toString().padLeft(2, '0')}';
       }
 
       if (observaciones != null && observaciones.isNotEmpty) {
@@ -91,10 +93,7 @@ class PedidoService {
     DateTime? fechaHasta,
   }) async {
     try {
-      final queryParams = <String, dynamic>{
-        'page': page,
-        'per_page': perPage,
-      };
+      final queryParams = <String, dynamic>{'page': page, 'per_page': perPage};
 
       if (estado != null) {
         queryParams['estado'] = EstadoInfo.enumToString(estado);
@@ -169,7 +168,7 @@ class PedidoService {
 
       return ApiResponse<Map<String, dynamic>>.fromJson(
         response.data,
-        (data) => data as Map<String, dynamic>,
+        (data) => data,
       );
     } on DioException catch (e) {
       return ApiResponse<Map<String, dynamic>>(
@@ -195,10 +194,7 @@ class PedidoService {
         '/app/pedidos/$pedidoId/extender-reservas',
       );
 
-      return ApiResponse<void>.fromJson(
-        response.data,
-        (data) => null,
-      );
+      return ApiResponse<void>.fromJson(response.data, (data) => null);
     } on DioException catch (e) {
       return ApiResponse<void>(
         success: false,
@@ -226,7 +222,7 @@ class PedidoService {
 
       return ApiResponse<Map<String, dynamic>>.fromJson(
         response.data,
-        (data) => data as Map<String, dynamic>,
+        (data) => data,
       );
     } on DioException catch (e) {
       return ApiResponse<Map<String, dynamic>>(

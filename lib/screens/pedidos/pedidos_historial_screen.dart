@@ -5,7 +5,7 @@ import '../../providers/providers.dart';
 import 'package:intl/intl.dart';
 
 class PedidosHistorialScreen extends StatefulWidget {
-  const PedidosHistorialScreen({Key? key}) : super(key: key);
+  const PedidosHistorialScreen({super.key});
 
   @override
   State<PedidosHistorialScreen> createState() => _PedidosHistorialScreenState();
@@ -18,8 +18,10 @@ class _PedidosHistorialScreenState extends State<PedidosHistorialScreen> {
   @override
   void initState() {
     super.initState();
-    _cargarPedidos();
     _scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _cargarPedidos();
+    });
   }
 
   @override
@@ -67,10 +69,7 @@ class _PedidosHistorialScreenState extends State<PedidosHistorialScreen> {
           children: [
             const Text(
               'Filtrar por estado',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             _buildFiltroEstadoOption(null, 'Todos los pedidos'),
@@ -190,7 +189,8 @@ class _PedidosHistorialScreenState extends State<PedidosHistorialScreen> {
                 Expanded(
                   child: ListView.builder(
                     controller: _scrollController,
-                    itemCount: pedidoProvider.pedidos.length +
+                    itemCount:
+                        pedidoProvider.pedidos.length +
                         (pedidoProvider.isLoadingMore ? 1 : 0),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     itemBuilder: (context, index) {
@@ -239,18 +239,18 @@ class _PedidosHistorialScreenState extends State<PedidosHistorialScreen> {
             _filtroEstadoSeleccionado != null
                 ? 'No hay pedidos con este estado'
                 : 'No tienes pedidos aún',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.grey.shade600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(color: Colors.grey.shade600),
           ),
           const SizedBox(height: 12),
           Text(
             _filtroEstadoSeleccionado != null
                 ? 'Intenta con otro filtro'
                 : 'Crea tu primer pedido desde el catálogo',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey.shade500,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade500),
           ),
           if (_filtroEstadoSeleccionado == null) ...[
             const SizedBox(height: 32),
@@ -259,7 +259,10 @@ class _PedidosHistorialScreenState extends State<PedidosHistorialScreen> {
               icon: const Icon(Icons.shopping_bag),
               label: const Text('Ver Productos'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
               ),
             ),
           ],
@@ -273,11 +276,7 @@ class _PedidosHistorialScreenState extends State<PedidosHistorialScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 80,
-            color: Colors.red,
-          ),
+          const Icon(Icons.error_outline, size: 80, color: Colors.red),
           const SizedBox(height: 24),
           Text(
             'Error al cargar pedidos',
@@ -308,10 +307,7 @@ class _PedidoCard extends StatelessWidget {
   final Pedido pedido;
   final VoidCallback onTap;
 
-  const _PedidoCard({
-    required this.pedido,
-    required this.onTap,
-  });
+  const _PedidoCard({required this.pedido, required this.onTap});
 
   String _formatearFecha(DateTime fecha) {
     final formatter = DateFormat('dd MMM yyyy, HH:mm', 'es_ES');
@@ -343,10 +339,7 @@ class _PedidoCard extends StatelessWidget {
                       children: [
                         const Text(
                           'Proforma',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -431,10 +424,7 @@ class _PedidoCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     '${pedido.cantidadItems} ${pedido.cantidadItems == 1 ? 'producto' : 'productos'}',
-                    style: TextStyle(
-                      color: Colors.grey.shade700,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
                   ),
                 ],
               ),
@@ -473,10 +463,7 @@ class _PedidoCard extends StatelessWidget {
                 children: [
                   const Text(
                     'Total',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   Text(
                     'Bs. ${pedido.total.toStringAsFixed(2)}',

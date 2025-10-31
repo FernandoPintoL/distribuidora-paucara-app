@@ -19,7 +19,7 @@ class TrackingService {
 
       return ApiResponse<Map<String, dynamic>>.fromJson(
         response.data,
-        (data) => data as Map<String, dynamic>,
+        (data) => data,
       );
     } on DioException catch (e) {
       return ApiResponse<Map<String, dynamic>>(
@@ -78,10 +78,7 @@ class TrackingService {
     try {
       final response = await _apiService.post(
         '/tracking/entregas/$entregaId/calcular-eta',
-        data: {
-          'lat_destino': latCliente,
-          'lng_destino': lngCliente,
-        },
+        data: {'lat_destino': latCliente, 'lng_destino': lngCliente},
       );
 
       final apiResponse = ApiResponse<DistanciaEstimada>.fromJson(
@@ -112,13 +109,11 @@ class TrackingService {
     int pedidoId,
   ) async {
     try {
-      final response = await _apiService.get(
-        '/app/pedidos/$pedidoId/tracking',
-      );
+      final response = await _apiService.get('/app/pedidos/$pedidoId/tracking');
 
       return ApiResponse<Map<String, dynamic>>.fromJson(
         response.data,
-        (data) => data as Map<String, dynamic>,
+        (data) => data,
       );
     } on DioException catch (e) {
       return ApiResponse<Map<String, dynamic>>(

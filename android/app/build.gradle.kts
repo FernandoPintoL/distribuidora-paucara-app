@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -32,7 +35,11 @@ android {
         versionName = flutter.versionName
 
         // Configurar la API key de Google Maps desde local.properties
-        val properties = gradleLocalProperties(rootDir)
+        val properties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            properties.load(FileInputStream(localPropertiesFile))
+        }
         val mapsApiKey = properties.getProperty("MAPS_API_KEY") ?: System.getenv("MAPS_API_KEY") ?: ""
         resValue("string", "MAPS_API_KEY", mapsApiKey)
     }

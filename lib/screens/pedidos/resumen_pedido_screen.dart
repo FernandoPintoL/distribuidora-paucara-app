@@ -49,9 +49,14 @@ class _ResumenPedidoScreenState extends State<ResumenPedidoScreen> {
       // Obtener items del carrito
       final items = carritoProvider.getItemsParaPedido();
 
+      // Validar que la dirección tenga un ID
+      if (widget.direccion.id == null) {
+        throw Exception('La dirección seleccionada no es válida');
+      }
+
       // Crear pedido
       final response = await _pedidoService.crearPedido(
-        direccionId: widget.direccion.id,
+        direccionId: widget.direccion.id!,
         items: items,
         fechaProgramada: widget.fechaProgramada,
         horaInicio: widget.horaInicio,
@@ -81,7 +86,9 @@ class _ResumenPedidoScreenState extends State<ResumenPedidoScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(response.message ?? 'Error al crear el pedido'),
+              content: Text(response.message.isNotEmpty
+                  ? response.message
+                  : 'Error al crear el pedido'),
               backgroundColor: Colors.red,
             ),
           );
@@ -188,11 +195,11 @@ class _ResumenPedidoScreenState extends State<ResumenPedidoScreen> {
                                   color: Colors.grey.shade200,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: item.producto.imagen != null
+                                child: item.producto.imagenes != null && item.producto.imagenes!.isNotEmpty
                                     ? ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(
-                                          item.producto.imagen!,
+                                          item.producto.imagenes!.first.url,
                                           fit: BoxFit.cover,
                                           errorBuilder: (_, __, ___) =>
                                               const Icon(Icons.image),
@@ -273,19 +280,19 @@ class _ResumenPedidoScreenState extends State<ResumenPedidoScreen> {
                                         fontSize: 16,
                                       ),
                                     ),
-                                    if (widget.direccion.zona != null) ...[
+                                    if (widget.direccion.ciudad != null) ...[
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Zona: ${widget.direccion.zona}',
+                                        'Ciudad: ${widget.direccion.ciudad}',
                                         style: const TextStyle(
                                           color: Colors.grey,
                                         ),
                                       ),
                                     ],
-                                    if (widget.direccion.referencia != null) ...[
+                                    if (widget.direccion.observaciones != null) ...[
                                       const SizedBox(height: 4),
                                       Text(
-                                        'Ref: ${widget.direccion.referencia}',
+                                        'Obs: ${widget.direccion.observaciones}',
                                         style: TextStyle(
                                           color: Colors.blue.shade700,
                                           fontSize: 13,

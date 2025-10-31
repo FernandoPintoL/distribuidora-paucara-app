@@ -6,8 +6,6 @@ import '../services/services.dart';
 import '../config/websocket_config.dart';
 import 'products/product_list_screen.dart';
 import 'clients/client_list_screen.dart';
-import 'pedidos/pedidos_historial_screen.dart';
-import 'carrito/carrito_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -47,7 +45,11 @@ class _HomeScreenState extends State<HomeScreen> {
         if (connected) {
           _showNotification('Conectado', 'Conexión establecida', Colors.green);
         } else {
-          _showNotification('Desconectado', 'Sin conexión al servidor', Colors.red);
+          _showNotification(
+            'Desconectado',
+            'Sin conexión al servidor',
+            Colors.red,
+          );
         }
       }
     });
@@ -167,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         content: Text(
           'Tu reserva de stock expira en $minutes minutos. '
-          '¿Deseas completar el pedido ahora?'
+          '¿Deseas completar el pedido ahora?',
         ),
         actions: [
           TextButton(
@@ -192,7 +194,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _handleStockUpdated(Map<String, dynamic> data) {
     // Actualizar UI de catálogo si estás en esa pantalla
-    debugPrint('Stock actualizado: ${data['nombre']} - ${data['stock_nuevo']} unidades');
+    debugPrint(
+      'Stock actualizado: ${data['nombre']} - ${data['stock_nuevo']} unidades',
+    );
 
     // Opcional: Mostrar notificación sutil
     // _showNotification('Stock Actualizado', '${data['nombre']}', Colors.blue);
@@ -519,7 +523,10 @@ class DashboardScreen extends StatelessWidget {
               Expanded(
                 child: _buildSummaryCard(
                   title: 'Mi Carrito',
-                  value: context.watch<CarritoProvider>().cantidadItems.toString(),
+                  value: context
+                      .watch<CarritoProvider>()
+                      .cantidadItems
+                      .toString(),
                   icon: Icons.shopping_cart,
                   color: Colors.orange,
                   onTap: () => Navigator.pushNamed(context, '/carrito'),

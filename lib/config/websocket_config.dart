@@ -34,6 +34,15 @@ class WebSocketConfig {
   // Eventos de Pagos
   static const String eventPaymentConfirmed = 'payment_confirmed';
 
+  // Eventos de Envíos/Logística
+  static const String eventEnvioProgramado = 'envio_programado';
+  static const String eventEnvioEnPreparacion = 'envio_en_preparacion';
+  static const String eventEnvioEnRuta = 'envio_en_ruta';
+  static const String eventUbicacionActualizada = 'ubicacion_actualizada';
+  static const String eventEnvioProximo = 'envio_proximo';
+  static const String eventEnvioEntregado = 'envio_entregado';
+  static const String eventEntregaRechazada = 'entrega_rechazada';
+
   // Eventos del Sistema
   static const String eventConnect = 'connect';
   static const String eventDisconnect = 'disconnect';
